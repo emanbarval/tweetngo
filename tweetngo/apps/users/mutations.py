@@ -5,13 +5,12 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.sites.shortcuts import get_current_site
+from graphql_jwt.shortcuts import get_token
 from .models import User, FollowerRequest
 from .types import UserType
+from .utils import getting_user
+from .signals import create_user_profile, save_user_profile
 
-def get_user_by_token(token):
-    # Implementa la lógica para obtener un usuario por su token
-    # Esto depende de cómo estés manejando la autenticación y los tokens en tu aplicación
-    pass
 
 class UserMutation(graphene.ObjectType):
     create_user = graphene.Field(UserType,
@@ -52,10 +51,7 @@ class UserMutation(graphene.ObjectType):
             raise Exception('Invalid credentials')
 
     def resolve_change_password(self, info, old_password, new_password):
-        token = info.context.META.get('HTTP_AUTHORIZATION', '').split(' ')[1]
-        user = get_user_by_token(token)
-        if not user:
-            raise Exception('Invalid token')
+        user = getting_user(info)
         if user.check_password(old_password):
             user.set_password(new_password)
             user.save()
@@ -89,11 +85,7 @@ class UserMutation(graphene.ObjectType):
         return True
 
     def resolve_follow_user(self, info, user_id):
-        token = info.context.META.get('HTTP_AUTHORIZATION', '').split(' ')[1]
-        user = get_user_by_token(token)
-        if not user:
-            raise Exception('Invalid token')
-
+        user = getting_user(info)
         user_to_follow = User.objects.get(id=user_id)
         existing_request = FollowerRequest.objects.filter(follower=user, target_user=user_to_follow).first()
         if existing_request:
@@ -106,10 +98,7 @@ class UserMutation(graphene.ObjectType):
         return user
 
     def resolve_accept_follower_request(self, info, request_id):
-        token = info.context.META.get('HTTP_AUTHORIZATION', '').split(' ')[1]
-        user = get_user_by_token(token)
-        if not user:
-            raise Exception('Invalid token')
+        user = getting_user(info)
         # Buscar la solicitud de seguimiento por su ID
         follower_request = FollowerRequest.objects.filter(id=request_id).first()
         if not follower_request:
@@ -127,11 +116,7 @@ class UserMutation(graphene.ObjectType):
         return True
 
     def resolve_unfollow_user(self, info, user_id):
-        token = info.context.META.get('HTTP_AUTHORIZATION', '').split(' ')[1]
-        user = get_user_by_token(token)
-        if not user:
-            raise Exception('Invalid token')
-
+        user = getting_user(info)
         user_to_unfollow = User.objects.get(id=user_id)
         user.profile.followers.remove(user_to_unfollow)
         return user
