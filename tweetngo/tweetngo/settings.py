@@ -37,6 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'graphene',
+    'graphene_django',
+    'apps.users',
+    'apps.posts',
+    'graphql_jwt',
+    'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
