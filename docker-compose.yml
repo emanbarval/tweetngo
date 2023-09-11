@@ -1,0 +1,22 @@
+version: '3.11'
+
+services:
+  db:
+    image: postgres
+    env_file:
+      - ./.envs/.postgres
+    volumes:
+      - /opt/postgres-data:/var/lib/postgresql/data
+  web:
+    build: .
+    command: python tweetngo/manage.py runserver 0.0.0.0:8000
+    env_file:
+      - ./.envs/.postgres
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+volumes:
+  postgres-data:
