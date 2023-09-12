@@ -5,10 +5,10 @@ from apps.users.schema import Mutation as UserThings
 #from apps.posts.schema import Mutation as PostsThings
 
 
-class Query(QueryUserThings, QueryPostThings, graphene.ObjectType):
+class Query(QueryUserThings, graphene.ObjectType): # QueryPostThings,
    pass
 
-class Mutation(UserThings, PostsThings, graphene.ObjectType):
+class Mutation(UserThings, graphene.ObjectType): #PostsThings, 
    pass
 
 schema = graphene.Schema(query=Query, mutation=Mutation) 
