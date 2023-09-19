@@ -9,7 +9,7 @@ services:
       - /opt/postgres-data:/var/lib/postgresql/data
   web:
     build: .
-    command: python tweetngo/manage.py runserver 0.0.0.0:8000
+    command: sh -c "python tweetngo/manage.py migrate && python tweetngo/manage.py runserver 0.0.0.0:8000"
     env_file:
       - ./.envs/.postgres
     volumes:
